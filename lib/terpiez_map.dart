@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -15,34 +16,49 @@ import 'package:terpiez/transparent_white_image_provider.dart';
 
 class TerpiezMap extends StatelessWidget {
   TerpiezMap({super.key});
+  final MapController _mapController = MapController();
 
   @override
   Widget build(BuildContext context) {
     var creatureState = context.watch<CreatureState>();
-    var locationState = context.watch<LocationState>();
+    var locationState = context.read<LocationState>();
+
+    var currentPosition = locationState.currentPosition;
+    var initialCenter = const LatLng(38.98615, -76.94306);
+    if (currentPosition == null) {
+      locationState.getCurrentPositionAsync().then((pos) => {
+            _mapController.move(
+                LatLng(pos.latitude, pos.longitude), _mapController.camera.zoom)
+          });
+    }
 
     var nearestCreature =
         NearestCreature(creatureState.wild, locationState.currentPosition);
 
     List<Marker> markers = <Marker>[];
-    if (nearestCreature.creature != null) {
+    for (var c in creatureState.wild) {
       markers.add(Marker(
-        point: nearestCreature.creature!.location,
-        child: Image(
-            image: TransparentWhiteImageProvider(
-                nearestCreature.creature!.species.thumbnailPath)),
-        // Image.file(File(nearestCreature.creature!.species.thumbnailPath)),
+        point: c.location,
+        child: GestureDetector(
+          onTap: () {
+            // Handle the tap action
+            // _onMarkerTap(context, c);
+            creatureState.catchCreature(c);
+          },
+          child: Image.network(dotenv.env['API_ROOT']! + c.species.image),
+        ),
         height: 80,
         width: 80,
       ));
     }
 
     return FlutterMap(
-      options: const MapOptions(
-        initialCenter: LatLng(38.98615, -76.94306),
-        initialZoom: 15,
+      mapController: _mapController,
+      options: MapOptions(
+        initialCenter: initialCenter,
+        initialZoom: 16,
         keepAlive: true,
-        interactionOptions: InteractionOptions(
+        interactionOptions: const InteractionOptions(
           enableMultiFingerGestureRace: true,
           flags: InteractiveFlag.doubleTapDragZoom |
               InteractiveFlag.doubleTapZoom |
@@ -69,14 +85,12 @@ class TerpiezMap extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image(
-                            image: TransparentWhiteImageProvider(nearestCreature
-                                .creature!.species.thumbnailPath)),
-                        // Image.file(
-                        //   File(nearestCreature.creature!.species.thumbnailPath),
-                        //   height: 40,
-                        //   width: 40,
-                        // ),
+                        Image.network(
+                          dotenv.env['API_ROOT']! +
+                              nearestCreature.creature!.species.image,
+                          height: 80,
+                          width: 80,
+                        ),
                         Text(
                           '${nearestCreature.creature!.species.name}: ${nearestCreature.distance.toStringAsFixed(0)}m',
                           style: Theme.of(context).textTheme.headlineSmall,
@@ -102,15 +116,11 @@ class TerpiezMap extends StatelessWidget {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                              title:
-                                  Text("Caught ${caughtCreature.species.name}"),
-                              content: Image(
-                                image: TransparentWhiteImageProvider(
-                                    caughtCreature.species.imagePath),
-                              )
-                              // Image.file(
-                              //     File(caughtCreature.species.imagePath))
-                              );
+                            title:
+                                Text("Caught ${caughtCreature.species.name}"),
+                            content: Image.network(dotenv.env['API_ROOT']! +
+                                caughtCreature.species.image),
+                          );
                         });
                   }
                   ShakeManager.getInstance().stop();
@@ -120,11 +130,9 @@ class TerpiezMap extends StatelessWidget {
                   child: ElevatedButton.icon(
                     icon: Padding(
                       padding: const EdgeInsets.all(5.0),
-                      child: Image(
-                        image: TransparentWhiteImageProvider(
-                            nearestCreature.creature!.species.thumbnailPath),
-                        //       )Image.file(
-                        // File(nearestCreature.creature!.species.thumbnailPath),
+                      child: Image.network(
+                        dotenv.env['API_ROOT']! +
+                            nearestCreature.creature!.species.image,
                         height: 45,
                         width: 45,
                       ),

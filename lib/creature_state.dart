@@ -2,25 +2,31 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:redis/redis.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:terpiez/api_service.dart';
 import 'package:terpiez/creature.dart';
 import 'package:terpiez/redis_manager.dart';
+import 'location_state.dart';
 
 class CreatureState extends ChangeNotifier {
-  late int _caughtCount;
-  final List<Creature> _wild = <Creature>[];
-  final List<Creature> _caught = <Creature>[];
-  final List<CreatureSpecies> _species = <CreatureSpecies>[];
-  //final conn = RedisConnection();
+  static final CreatureState _instance = CreatureState._internal();
 
-  CreatureState() {
+  factory CreatureState() => _instance;
+
+  CreatureState._internal() {
     _caughtCount = 0;
     _init();
   }
+
+  final ApiService apiService = ApiService();
+  late int _caughtCount;
+  late List<Creature> _wild = <Creature>[];
+  final List<Creature> _caught = <Creature>[];
+  late List<CreatureSpecies> _species = <CreatureSpecies>[];
+  //final conn = RedisConnection();
 
   void resetCreatures() {
     _caught.clear();
@@ -28,8 +34,31 @@ class CreatureState extends ChangeNotifier {
   }
 
   Future<void> _init() async {
-    await _getLocations();
-    await _loadCaught();
+    // await _getLocations();
+    // await _loadCaught();
+    await _loadCreatures();
+  }
+
+  Future<void> _loadCreatures() async {
+    _species = await apiService.fetchList<CreatureSpecies>(
+      'species/list',
+      (data) => CreatureSpecies.fromMap(data, data['id']),
+    );
+    final locationState = LocationState();
+    final position = await locationState.getCurrentPositionAsync();
+    _wild = await apiService.fetchList<Creature>(
+      'creatures/get-by-lat-lng',
+      (data) => Creature.fromMap(data),
+      body: {
+        "lat": position.latitude,
+        "lng": position.longitude,
+      },
+    );
+    notifyListeners();
+  }
+
+  CreatureSpecies lookup(int id) {
+    return _species.firstWhere((species) => species.id == id);
   }
 
   Future<void> _loadCaught() async {
@@ -40,7 +69,8 @@ class CreatureState extends ChangeNotifier {
         var map = jsonDecode(json);
         String id = map['species']['id'] as String;
         var species = _species.where((element) => element.id == id).firstOrNull;
-        var creature = Creature(LatLng.fromJson(map['location']), species!);
+        var creature =
+            Creature(LatLng.fromJson(map['location']), species!, "1234", "ned");
         _caught.add(creature);
         //remove from wild
         _wild.removeWhere((element) =>
@@ -96,13 +126,12 @@ class CreatureState extends ChangeNotifier {
           await command.send_object(["JSON.GET", "terpiez", location.id]).then(
               (var response) async {
             var map = jsonDecode(response) as Map<String, dynamic>;
-            species = CreatureSpecies.fromMap(map, location.id);
+            //species = CreatureSpecies.fromMap(map, location.id);
             _species.add(species!);
           });
           //print('redis: $species');
         }
-        species!.thumbnailPath = await _getImage(species!.thumbnail, command);
-        species!.imagePath = await _getImage(species!.image, command);
+        species!.image = await _getImage(species!.image, command);
         LatLng loc = LatLng(location.lat, location.lon);
         //only add to wild if it has NOT already been caught
         var c = _caught
@@ -112,7 +141,7 @@ class CreatureState extends ChangeNotifier {
                 element.species.id == species!.id)
             .firstOrNull;
         if (c == null) {
-          _wild.add(Creature(loc, species!));
+          _wild.add(Creature(loc, species!, "1234", "ned"));
         }
       }
       notifyListeners();
@@ -146,9 +175,17 @@ class CreatureState extends ChangeNotifier {
 
   void catchCreature(Creature creature) {
     if (_wild.remove(creature)) {
-      _caught.add(creature);
-      _caughtCount++;
-      _saveCaught();
+      apiService.postRequest("creatures/catch", body: {
+        'id': creature.species.id,
+        'hash': creature.hash,
+        'lat': creature.location.latitude,
+        'lng': creature.location.longitude,
+        'name': creature.name,
+        'weather_code': 1, // placeholder
+      });
+      // _caught.add(creature);
+      // _caughtCount++;
+      // _saveCaught();
     }
     notifyListeners();
   }

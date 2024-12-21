@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:terpiez/creature.dart';
 import 'package:terpiez/main.dart';
@@ -46,14 +46,14 @@ class _BackgroundMonitorState extends State<BackgroundMonitor>
           (currentCreature == null ||
               currentCreature != nearestCreature.creature) &&
           nearestCreature.distance < 20) {
-        await flutterLocalNotificationsPlugin.show(
-          (DateTime.now().hashCode).abs(),
-          'Creature Nearby',
-          'A ${nearestCreature.creature!.species.name} within 20m of your location, catch it!',
-          const NotificationDetails(
-            iOS: DarwinNotificationDetails(sound: "pop.mp3"),
-          ),
-        );
+        // await flutterLocalNotificationsPlugin.show(
+        //   (DateTime.now().hashCode).abs(),
+        //   'Creature Nearby',
+        //   'A ${nearestCreature.creature!.species.name} within 20m of your location, catch it!',
+        //   const NotificationDetails(
+        //     iOS: DarwinNotificationDetails(sound: "pop.mp3"),
+        //   ),
+        // );
         currentCreature = nearestCreature.creature;
       }
     }

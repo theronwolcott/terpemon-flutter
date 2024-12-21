@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:terpiez/background_monitor.dart';
@@ -18,27 +18,27 @@ import 'globals.dart';
 import 'location_state.dart';
 import 'terpiez_map.dart';
 
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+// FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//     FlutterLocalNotificationsPlugin();
 
-final DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings();
+// final DarwinInitializationSettings initializationSettingsDarwin =
+//     DarwinInitializationSettings();
 
-final InitializationSettings initializationSettings = InitializationSettings(
-  iOS: initializationSettingsDarwin,
-  macOS: initializationSettingsDarwin,
-);
+// final InitializationSettings initializationSettings = InitializationSettings(
+//   iOS: initializationSettingsDarwin,
+//   macOS: initializationSettingsDarwin,
+// );
 int initTabIndex = 0;
 bool isForeground = true;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-    onDidReceiveNotificationResponse: (details) {
-      initTabIndex = 1;
-    },
-  );
+  // await flutterLocalNotificationsPlugin.initialize(
+  //   initializationSettings,
+  //   onDidReceiveNotificationResponse: (details) {
+  //     initTabIndex = 1;
+  //   },
+  // );
   await dotenv.load(fileName: '.env');
   runApp(MyApp());
 }

@@ -1,15 +1,32 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationState extends ChangeNotifier {
+  static final LocationState _instance = LocationState._internal();
+
+  factory LocationState() => _instance;
+
+  LocationState._internal() {
+    _listenToPosition();
+  }
+
   Position? _currentPosition;
+  Completer<Position>? _positionCompleter;
 
   Position? get currentPosition {
     return _currentPosition;
   }
 
-  LocationState() {
-    _listenToPosition();
+  Future<Position> getCurrentPositionAsync() async {
+    if (_currentPosition != null) {
+      return _currentPosition!;
+    } else {
+      // If position is not yet available, return a Future that will complete when the position is obtained
+      _positionCompleter ??= Completer<Position>();
+      return _positionCompleter!.future;
+    }
   }
 
   Future<void> _listenToPosition() async {
@@ -22,6 +39,11 @@ class LocationState extends ChangeNotifier {
       _currentPosition = position;
       //debugPrint(_currentPosition.toString());
       notifyListeners();
+
+      // If a Completer exists, complete it with the new position
+      if (_positionCompleter != null && !_positionCompleter!.isCompleted) {
+        _positionCompleter!.complete(position);
+      }
     });
   }
 

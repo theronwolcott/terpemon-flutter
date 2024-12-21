@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:terpiez/nearest_creature.dart';
 import 'package:terpiez/transparent_white_image_provider.dart';
@@ -109,10 +110,9 @@ class _CompassState extends State<Compass> {
                 turns: -turns,
                 duration: duration,
                 curve: curve,
-                child: Image(
-                  image: TransparentWhiteImageProvider(
-                      nearestCreature.creature!.species.imagePath),
-                  // AssetImage(nearestCreature.creature!.species.imagePath),
+                child: Image.network(
+                  dotenv.env['API_ROOT']! +
+                      nearestCreature.creature!.species.image,
                   height: 70,
                 ),
               ),

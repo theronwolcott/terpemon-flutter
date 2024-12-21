@@ -1,46 +1,51 @@
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:terpiez/creature.dart';
-import 'package:terpiez/transparent_white_image_provider.dart';
 import 'package:weather_animation/weather_animation.dart';
-
-import 'creature_state.dart';
 
 class CreatureDetails extends StatelessWidget {
   final CreatureSpecies species;
-  const CreatureDetails({super.key, required this.species});
+  final List<Captured> caught; // only the ones of this same species
+  const CreatureDetails(
+      {super.key, required this.species, required this.caught});
 
   @override
   Widget build(BuildContext context) {
-    var creatureState = context.watch<CreatureState>();
-    var caught = creatureState.caught
-        .where((creature) => creature.species.id == species.id);
+    // var creatureState = context.watch<CreatureState>();
+    // var caught = creatureState.caught
+    //     .where((creature) => creature.species.id == species.id);
 
-    var points = caught.map((sp) => sp.location).toList();
-    if (points.length == 1) {
-      points
-          .add(LatLng(points[0].latitude + 0.001, points[0].longitude + 0.001));
-      points
-          .add(LatLng(points[0].latitude - 0.001, points[0].longitude - 0.001));
-    }
+    var points = caught.map((c) => c.creature.location).toList();
+    // make map bounds from points, so all points are on the map
     var bounds = LatLngBounds.fromPoints(points);
+    // extend bounds so markers aren't right on the edge of the map
+    bounds = LatLngBounds(
+        LatLng(bounds.southWest.latitude - 0.005,
+            bounds.southWest.longitude - 0.005),
+        LatLng(bounds.northEast.latitude + 0.005,
+            bounds.northEast.longitude + 0.005));
 
     List<Marker> markers = <Marker>[];
-    for (var c in caught) {
+    for (var c in caught
+        .where((captured) => captured.creature.species.id == species.id)) {
       markers.add(Marker(
-        point: c.location,
-        child: Image(
-          image: TransparentWhiteImageProvider(species.thumbnailPath),
+        point: c.creature.location,
+        child: Image.network(
+          dotenv.env['API_ROOT']! + c.creature.species.image,
         ),
         // Image.file(File(species.thumbnailPath)),
         height: 80,
         width: 80,
       ));
     }
+
+    //return Text("${caught.length}");
 
     return Scaffold(
       appBar: AppBar(
@@ -63,8 +68,8 @@ class CreatureDetails extends StatelessWidget {
                 children: [
                   Hero(
                     tag: species,
-                    child: Image(
-                      image: TransparentWhiteImageProvider(species.imagePath),
+                    child: Image.network(
+                      dotenv.env['API_ROOT']! + species.image,
                       width: 300,
                     ),
                     // Image.file(
@@ -103,13 +108,14 @@ class CreatureDetails extends StatelessWidget {
                           child: SizedBox(
                             width: 400,
                             height: 400,
+                            //child: Text("hi"),
                             child: FlutterMap(
                               options: MapOptions(
                                 initialCameraFit:
                                     CameraFit.bounds(bounds: bounds),
-                                minZoom: 16,
+                                //minZoom: 16,
                                 //initialCenter: LatLng(38.98615, -76.94306),
-                                //initialZoom: 15,
+                                initialZoom: 15,
                                 interactionOptions: InteractionOptions(
                                   flags: InteractiveFlag.none,
                                 ),
@@ -122,6 +128,32 @@ class CreatureDetails extends StatelessWidget {
                                 ),
                                 MarkerLayer(markers: markers),
                               ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: SizedBox(
+                            width: 400,
+                            child: ListView.builder(
+                              shrinkWrap:
+                                  true, // Allow ListView to take only the required space
+                              physics:
+                                  const NeverScrollableScrollPhysics(), // Prevent independent scrolling
+                              itemCount: caught.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(caught[index].creature.name),
+                                  subtitle: Text(DateFormat("MMMM d 'at' h:mma")
+                                      .format(caught[index].timestamp)),
+                                  leading: Image.network(
+                                    dotenv.env['API_ROOT']! +
+                                        caught[index].creature.species.image,
+                                    height: 80,
+                                    width: 80,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ),

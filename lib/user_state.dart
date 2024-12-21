@@ -3,6 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class UserState extends ChangeNotifier {
+  static final UserState _instance = UserState._internal();
+
+  factory UserState() => _instance;
+
+  UserState._internal() {
+    _loadUser();
+  }
+
   String _id = "0";
   DateTime _startDate = DateTime.now();
   bool _isSoundOn = true;
@@ -10,10 +18,6 @@ class UserState extends ChangeNotifier {
   String dateKey = 'UserState.date';
   String isSoundOnKey = 'UserState.isSoundOn';
   late SharedPreferences prefs;
-
-  UserState() {
-    _loadUser();
-  }
 
   Future<void> _loadUser() async {
     prefs = await SharedPreferences.getInstance();
