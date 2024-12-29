@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:terpiez/creature.dart';
 import 'package:weather_animation/weather_animation.dart';
 
+import 'animated_bouncing_creature.dart';
+
 class CreatureDetails extends StatelessWidget {
   final CreatureSpecies species;
   final List<Captured> caught; // only the ones of this same species
@@ -56,9 +58,7 @@ class CreatureDetails extends StatelessWidget {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: WeatherSceneWidget(
-              weatherScene: species.weather,
-            ),
+            child: species.weather.sceneWidget,
           ),
           SingleChildScrollView(
             child: Padding(
@@ -68,9 +68,9 @@ class CreatureDetails extends StatelessWidget {
                 children: [
                   Hero(
                     tag: species,
-                    child: Image.network(
-                      dotenv.env['API_ROOT']! + species.image,
-                      width: 300,
+                    child: AnimatedBouncingCreature(
+                      species: species,
+                      size: 300,
                     ),
                     // Image.file(
                     //   File(species.imagePath),
@@ -116,7 +116,7 @@ class CreatureDetails extends StatelessWidget {
                                 //minZoom: 16,
                                 //initialCenter: LatLng(38.98615, -76.94306),
                                 initialZoom: 15,
-                                interactionOptions: InteractionOptions(
+                                interactionOptions: const InteractionOptions(
                                   flags: InteractiveFlag.none,
                                 ),
                               ),

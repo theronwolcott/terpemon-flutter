@@ -38,7 +38,7 @@ class _CompassState extends State<Compass> {
     double compassSize = 200;
     double scale = 200 / 530;
 
-    double creatureBearing = nearestCreature?.bearing ?? 0.0;
+    double creatureBearing = nearestCreature.bearing ?? 0.0;
     var angle = (90.0 - creatureBearing) % 360.0;
     double creatureX = 55 * cos(angle * pi / 180.0);
     double creatureY = 55 * sin(angle * pi / 180.0);
@@ -102,7 +102,7 @@ class _CompassState extends State<Compass> {
               ),
             ),
           ),
-          if (nearestCreature != null)
+          if (nearestCreature.creature != null)
             Positioned(
               left: (creatureX + (compassSize / 2) - 35),
               top: (-creatureY + (compassSize / 2) - 35),

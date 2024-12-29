@@ -45,9 +45,7 @@ class StatisticsTab extends StatelessWidget {
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
-                return WeatherSceneWidget(
-                  weatherScene: snapshot.data!,
-                );
+                return snapshot.data!.sceneWidget;
               }
             }),
       ),

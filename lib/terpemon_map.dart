@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -8,14 +6,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:terpiez/creature_state.dart';
 import 'package:terpiez/location_state.dart';
-import 'package:terpiez/main.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:terpiez/nearest_creature.dart';
 import 'package:terpiez/shaker_manager.dart';
-import 'package:terpiez/transparent_white_image_provider.dart';
 
-class TerpiezMap extends StatelessWidget {
-  TerpiezMap({super.key});
+class TerpemonMap extends StatelessWidget {
+  TerpemonMap({super.key});
   final MapController _mapController = MapController();
 
   @override
@@ -80,7 +76,7 @@ class TerpiezMap extends StatelessWidget {
             Builder(builder: (context) {
               if (nearestCreature.creature != null) {
                 return Container(
-                  color: Color.fromARGB(150, 255, 255, 255),
+                  color: const Color.fromARGB(150, 255, 255, 255),
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -102,10 +98,9 @@ class TerpiezMap extends StatelessWidget {
               }
               return Container();
             }),
-            Spacer(),
+            const Spacer(),
             Builder(builder: (context) {
-              if (nearestCreature.distance != null &&
-                  nearestCreature.distance <= 10) {
+              if (nearestCreature.distance <= 10) {
                 ShakeManager.getInstance().start(() {
                   if (nearestCreature.creature != null &&
                       ShakeManager.getInstance().didShake) {
@@ -137,7 +132,7 @@ class TerpiezMap extends StatelessWidget {
                         width: 45,
                       ),
                     ),
-                    label: Text(
+                    label: const Text(
                       'Shake to catch!',
                       textScaler: TextScaler.linear(1.8),
                     ),
@@ -156,6 +151,21 @@ class TerpiezMap extends StatelessWidget {
               return Container();
             }),
           ],
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: FloatingActionButton(
+              onPressed: () {
+                locationState.getCurrentPositionAsync().then((pos) => {
+                      _mapController.move(LatLng(pos.latitude, pos.longitude),
+                          _mapController.camera.zoom)
+                    });
+              },
+              child: Icon(Icons.my_location),
+            ),
+          ),
         ),
       ],
     );

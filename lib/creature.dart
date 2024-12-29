@@ -62,17 +62,19 @@ class CreatureSpecies {
   String name;
   String description;
   String image = '';
+  int bestOf = 1;
+  double winPct = 0.5;
   late WeatherScene weather;
   CreatureStats stats;
 
-  CreatureSpecies(
-      this.id, this.name, this.description, this.image, this.stats) {
+  CreatureSpecies(this.id, this.name, this.description, this.image, this.bestOf,
+      this.winPct, this.stats) {
     weather = WeatherScene.values[name.hashCode % WeatherScene.values.length];
   }
 
   factory CreatureSpecies.fromMap(Map<String, dynamic> map, int id) {
     return CreatureSpecies(id, map['name'], map['description'], map['image'],
-        CreatureStats.fromMap(map['stats']));
+        map['bestOf'], map['winPct'], CreatureStats.fromMap(map['stats']));
   }
 
   Map<String, dynamic> toJson() => {
@@ -80,13 +82,15 @@ class CreatureSpecies {
         'name': name,
         'description': description,
         'image': image,
+        'bestOf': bestOf,
+        'winPct': winPct,
         'stats': stats.toJson(),
       };
 
   @override
   String toString() {
     String s =
-        '[id: $id; name: $name; image: $image; stats: ${stats.toString()}]';
+        '[id: $id; name: $name; image: $image; bestOf: $bestOf; winPct: $winPct; stats: ${stats.toString()}]';
     return s;
   }
 }

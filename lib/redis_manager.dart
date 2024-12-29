@@ -56,7 +56,7 @@ class RedisManager {
   }
 
   void _startMonitoring() {
-    Timer.periodic(Duration(seconds: 10), (timer) async {
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
       if (!isForeground) {
         return;
       }

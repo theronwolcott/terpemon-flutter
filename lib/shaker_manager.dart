@@ -4,7 +4,7 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 class ShakeManager {
   static ShakeManager? _instance;
-  double _maxAcceleration = 0.0;
+  final double _maxAcceleration = 0.0;
   bool _isRecording = false;
   bool _didShake = false;
   late StreamSubscription<AccelerometerEvent> streamSubscription;

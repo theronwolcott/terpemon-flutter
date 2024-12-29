@@ -65,7 +65,7 @@ class CreatureState extends ChangeNotifier {
     var pref = await SharedPreferences.getInstance();
     var jsonList = pref.getStringList('CreatureState.caught');
     if (jsonList != null) {
-      for (var json in jsonList!) {
+      for (var json in jsonList) {
         var map = jsonDecode(json);
         String id = map['species']['id'] as String;
         var species = _species.where((element) => element.id == id).firstOrNull;
@@ -94,7 +94,7 @@ class CreatureState extends ChangeNotifier {
     //pref.remove('CreatureState.species');
     var jsonList = pref.getStringList('CreatureState.species');
     if (jsonList != null) {
-      for (var json in jsonList!) {
+      for (var json in jsonList) {
         var map = jsonDecode(json);
         _species.add(CreatureSpecies.fromMap(map, map['id']));
       }
@@ -131,17 +131,17 @@ class CreatureState extends ChangeNotifier {
           });
           //print('redis: $species');
         }
-        species!.image = await _getImage(species!.image, command);
+        species!.image = await _getImage(species.image, command);
         LatLng loc = LatLng(location.lat, location.lon);
         //only add to wild if it has NOT already been caught
         var c = _caught
             .where((element) =>
                 element.location.latitude == loc.latitude &&
                 element.location.longitude == loc.longitude &&
-                element.species.id == species!.id)
+                element.species.id == species.id)
             .firstOrNull;
         if (c == null) {
-          _wild.add(Creature(loc, species!, "1234", "ned"));
+          _wild.add(Creature(loc, species, "1234", "ned"));
         }
       }
       notifyListeners();

@@ -29,7 +29,7 @@ class ListTab extends StatelessWidget {
       future: fetchData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Show loading
+          return const CircularProgressIndicator(); // Show loading
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
@@ -40,7 +40,7 @@ class ListTab extends StatelessWidget {
           caughtSpeciesList.sort((a, b) => a.name.compareTo(b.name));
 
           return Center(
-            child: caughtSpeciesList.length == 0
+            child: caughtSpeciesList.isEmpty
                 ? const Center(child: Text('No creatures caught yet'))
                 : ListView.builder(
                     itemCount: caughtSpeciesList.length,

@@ -1,22 +1,17 @@
-import 'dart:collection';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:terpiez/background_monitor.dart';
-import 'package:terpiez/creature.dart';
 import 'package:terpiez/creature_state.dart';
-import 'package:terpiez/finder_tab.dart';
 import 'package:terpiez/list_tab.dart';
-import 'package:terpiez/redis_manager.dart';
-import 'package:terpiez/statistics_tab.dart';
 import 'package:terpiez/user_state.dart';
-import 'package:uuid/uuid.dart';
-import 'package:weather_animation/weather_animation.dart';
 import 'globals.dart';
 import 'location_state.dart';
-import 'terpiez_map.dart';
+import 'take_picture_screen.dart';
+import 'terpemon_map.dart';
+import 'main_tab.dart';
 
 // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 //     FlutterLocalNotificationsPlugin();
@@ -39,16 +34,40 @@ Future main() async {
   //     initTabIndex = 1;
   //   },
   // );
+  final cameras = await availableCameras();
+  final firstCamera = cameras.first;
   await dotenv.load(fileName: '.env');
-  runApp(MyApp());
+  runApp(MyApp(camera: firstCamera));
 }
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+class MyApp extends StatefulWidget {
+  MyApp({super.key, required this.camera});
+  final CameraDescription camera;
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final PageController _pageController;
 
   final _creatureState = CreatureState();
   final _userState = UserState();
   final _locationState = LocationState();
+
+  int _selectedIndex = 0; //New
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,46 +79,74 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
           scaffoldMessengerKey: scaffoldMessengerKey,
-          title: 'Terpiez',
-          home: DefaultTabController(
-              initialIndex: 1,
-              length: 3,
-              child: Scaffold(
-                  drawer: Drawer(
-                    child: ListView(
-                      // Important: Remove any padding from the ListView.
-                      padding: EdgeInsets.zero,
-                      children: [
-                        const DrawerHeader(
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 73, 86, 97),
-                          ),
-                          child: Text('Settings'),
-                        ),
-                        SoundTile(),
-                        ResetUserPrefs(),
-                      ],
+          title: 'Terpémon',
+          home: Scaffold(
+            drawer: Drawer(
+              child: ListView(
+                // Important: Remove any padding from the ListView.
+                padding: EdgeInsets.zero,
+                children: const [
+                  DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 73, 86, 97),
                     ),
+                    child: Text('Settings'),
                   ),
-                  appBar: AppBar(
-                      title: const Text('Terpiez'),
-                      bottom: const TabBar(
-                        tabs: [
-                          Tab(
-                              text: 'Statistics',
-                              icon: Icon(Icons.query_stats)),
-                          Tab(text: 'Finder', icon: Icon(Icons.search)),
-                          Tab(text: 'Caught', icon: Icon(Icons.list)),
-                        ],
-                      )),
-                  floatingActionButton: BackgroundMonitor(),
-                  body: TabBarView(
-                    children: [
-                      StatisticsTab(),
-                      TerpiezMap(),
-                      ListTab(),
-                    ],
-                  )))),
+                  SoundTile(),
+                  ResetUserPrefs(),
+                ],
+              ),
+            ),
+            appBar: AppBar(
+              title: const Text('Terpémon'),
+            ),
+            floatingActionButton: const BackgroundMonitor(),
+            body: PageView(
+              controller: _pageController,
+              onPageChanged: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              children: [
+                // const StatisticsTab(),
+                // const MainTab(),
+                TakePictureScreen(
+                  camera: widget.camera,
+                ),
+                TerpemonMap(),
+                ListTab(),
+              ],
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: (int index) {
+                _pageController.jumpToPage(
+                  // _pageController.animateToPage(
+                  index,
+                  // duration: const Duration(milliseconds: 300),
+                  // curve: Curves.easeInOut,
+                );
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.format_list_numbered),
+                  label: 'Stats',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.map),
+                  label: 'Finder',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.system_update),
+                  label: 'Caught',
+                ),
+              ],
+            ),
+          )),
     );
   }
 }
@@ -117,13 +164,13 @@ class ResetUserPrefs extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Confirm Reset"),
-            content: Text(
+            title: const Text("Confirm Reset"),
+            content: const Text(
                 'Are you sure you want to reset your account? All current data will be lost.'),
             actions: [
               TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel')),
+                  child: const Text('Cancel')),
               TextButton(
                 onPressed: () {
                   //erase
@@ -131,7 +178,7 @@ class ResetUserPrefs extends StatelessWidget {
                   creatureState.resetCreatures();
                   Navigator.of(context).pop();
                 },
-                child: Text('Erase'),
+                child: const Text('Erase'),
               ),
             ],
           );
@@ -141,7 +188,7 @@ class ResetUserPrefs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(Icons.person),
+      leading: const Icon(Icons.person),
       title: const Text('Clear User Settings'),
       onTap: () {
         Navigator.pop(context);
@@ -168,7 +215,7 @@ class _SoundTileState extends State<SoundTile> {
 
     return ListTile(
       title: const Text('Sound'),
-      leading: Icon(Icons.volume_up),
+      leading: const Icon(Icons.volume_up),
       trailing: Switch(
           value: initSoundOn,
           onChanged: (value) {
