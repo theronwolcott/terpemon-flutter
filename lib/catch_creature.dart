@@ -263,6 +263,9 @@ class CatchGame {
       status.gameText = "Shoot!";
     }
   }
+  void reset() {
+    status = CatchGameStatus();
+  }
 
   (RockPaperScissors, int, CatchGameStatus) shoot(RockPaperScissors user) {
     var majority = (bestOf / 2).ceil();
@@ -279,21 +282,19 @@ class CatchGame {
         status.result = -1;
         status.gameText = "I've Escaped";
       }
-      status.roundText = "Sorry, buddy";
     } else if (x < tieLevel) {
       computer = RockPaperScissors.values[user.index];
       roundResult = 0;
-      status.roundText = "Hmm. A Tie.";
     } else {
       computer = RockPaperScissors.values[(user.index - 1 + 3) % 3];
       roundResult = 1;
-      status.roundText = "Oof, nice one";
       status.user++;
       if (status.user >= majority) {
         status.result = 1;
         status.gameText = "Caught! Nooo!";
       }
     }
+    status.roundText = throwResult(status, roundResult, _random);
     if (status.result == 0) {
       if (status.user == status.computer) {
         status.gameText = "Tied ${status.user}-${status.computer}";
@@ -318,6 +319,37 @@ class CatchGame {
       if (computer == RockPaperScissors.rock) return -1;
     }
     return 1;
+  }
+
+  static String throwResult(CatchGameStatus status, int result, Random random) {
+    if (result == 0) {
+      // tie
+      var list = [
+        'Hmm. A Tie.',
+        'Same thought!',
+        'Twins!',
+      ];
+      return list[random.nextInt(list.length)];
+    } else if (result == -1) {
+      // creature won
+      var list = [
+        'Haha!',
+        'Point for me!',
+        'One for me!',
+        'I win this one!',
+      ];
+      return list[random.nextInt(list.length)];
+    } else if (result == 1) {
+      // user won
+      var list = [
+        'Your point!',
+        'Oof, nice one',
+        'One for you',
+        'I slipped!',
+      ];
+      return list[random.nextInt(list.length)];
+    }
+    return "";
   }
 }
 

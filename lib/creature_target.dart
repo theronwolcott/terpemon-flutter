@@ -33,7 +33,7 @@ class _CreatureTargetState extends State<CreatureTarget> {
     double scale = 1.0;
     if (distance > 100) {
       scale = 0.1;
-    } else if (scale > 10) {
+    } else if (distance > 10) {
       scale = (110 - distance) / 100.0;
     }
     scale = 1.0;
@@ -62,7 +62,7 @@ class _CreatureTargetState extends State<CreatureTarget> {
       children: [
         SizedBox(
           width: MediaQuery.of(context).size.width,
-          height: 250,
+          height: 300,
           child: TweenAnimationBuilder(
             tween: Tween<double>(
               begin: previousOffsetX,

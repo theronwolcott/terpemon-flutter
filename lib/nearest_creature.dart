@@ -16,8 +16,8 @@ class NearestCreature {
           distance = d;
         }
       }
-      bearing = Geolocator.bearingBetween(creature!.location.latitude,
-          creature!.location.latitude, position.latitude, position.longitude);
+      bearing = Geolocator.bearingBetween(position.latitude, position.longitude,
+          creature!.location.latitude, creature!.location.longitude);
     }
   }
 }

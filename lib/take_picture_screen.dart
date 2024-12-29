@@ -2,7 +2,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:terpiez/location_state.dart';
-import 'package:terpiez/test.dart';
 
 import 'catch_creature.dart';
 import 'compass.dart';
