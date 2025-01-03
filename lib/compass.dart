@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
-import 'package:terpiez/nearest_creature.dart';
-import 'package:terpiez/transparent_white_image_provider.dart';
+import 'package:flutter_compass/flutter_compass.dart';
+import 'package:rxdart/rxdart.dart';
+import 'nearest_creature.dart';
+import 'transparent_white_image_provider.dart';
 import 'creature_state.dart';
 import 'location_state.dart';
 
@@ -20,7 +23,7 @@ class Compass extends StatefulWidget {
 class _CompassState extends State<Compass> {
   double turns = 0;
   double previousHeading = 0;
-  Duration duration = const Duration(milliseconds: 500);
+  Duration duration = const Duration(milliseconds: 100);
   Curve curve = Curves.easeInOutQuad;
 
   @override
@@ -31,10 +34,10 @@ class _CompassState extends State<Compass> {
     var nearestCreature =
         NearestCreature(creatureState.wild, locationState.currentPosition);
 
-    CompassModel compassValues = getCompassValues(
-        locationState.currentPosition?.heading ??
-            widget.heading); // updates previousHeading
-    turns = compassValues.turns;
+    // CompassModel compassValues = getCompassValues(
+    //     locationState.currentPosition?.heading ??
+    //         widget.heading); // updates previousHeading
+    // turns = compassValues.turns;
     double compassSize = 200;
     double scale = 200 / 530;
 
@@ -43,102 +46,134 @@ class _CompassState extends State<Compass> {
     double creatureX = 55 * cos(angle * pi / 180.0);
     double creatureY = 55 * sin(angle * pi / 180.0);
 
-    return AnimatedRotation(
-      turns: turns,
-      duration: duration,
-      curve: Curves.easeInOutQuad,
-      child: Stack(
-        children: [
-          Image.asset('assets/compass/base.png'),
-          Positioned(
-            left: 214 * scale,
-            top: 22 * scale,
-            child: AnimatedRotation(
-              turns: -turns,
-              duration: duration,
-              curve: curve,
-              child: Image(
-                image: const AssetImage('assets/compass/n.png'),
-                height: 76 * scale,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 428 * scale,
-            top: 227 * scale,
-            child: AnimatedRotation(
-              turns: -turns,
-              duration: duration,
-              curve: curve,
-              child: Image(
-                image: const AssetImage('assets/compass/e.png'),
-                height: 76 * scale,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 214 * scale,
-            top: 444 * scale,
-            child: AnimatedRotation(
-              turns: -turns,
-              duration: duration,
-              curve: curve,
-              child: Image(
-                image: const AssetImage('assets/compass/s.png'),
-                height: 76 * scale,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0 * scale,
-            top: 227 * scale,
-            child: AnimatedRotation(
-              turns: -turns,
-              duration: duration,
-              curve: curve,
-              child: Image(
-                image: const AssetImage('assets/compass/w.png'),
-                height: 76 * scale,
-              ),
-            ),
-          ),
-          if (nearestCreature.creature != null)
-            Positioned(
-              left: (creatureX + (compassSize / 2) - 35),
-              top: (-creatureY + (compassSize / 2) - 35),
-              child: AnimatedRotation(
-                turns: -turns,
-                duration: duration,
-                curve: curve,
-                child: Image.network(
-                  dotenv.env['API_ROOT']! +
-                      nearestCreature.creature!.species.image,
-                  height: 70,
+    return StreamBuilder<CompassEvent>(
+        stream:
+            FlutterCompass.events?.throttleTime(Duration(milliseconds: 100)),
+        builder: (context, snapshot) {
+          // if (snapshot.connectionState == ConnectionState.waiting) {
+          //   // Show a loading indicator while waiting for stream data
+          //   return Center(child: CircularProgressIndicator());
+          // }
+
+          if (snapshot.hasError) {
+            // Handle stream error gracefully
+            return Center(child: Text("Compass data unavailable"));
+          }
+
+          double heading;
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            heading = previousHeading;
+          } else {
+            heading = snapshot.data?.heading == null
+                ? previousHeading
+                : snapshot.data!.heading!;
+          }
+          CompassModel compassValues = getCompassValues(heading);
+          turns = compassValues.turns;
+
+          // debugPrint(heading.toString());
+
+          return AnimatedRotation(
+            turns: turns,
+            duration: duration,
+            curve: Curves.easeInOutQuad,
+            child: Stack(
+              children: [
+                Image.asset('assets/compass/base.png'),
+                Positioned(
+                  left: 214 * scale,
+                  top: 22 * scale,
+                  child: AnimatedRotation(
+                    turns: -turns,
+                    duration: duration,
+                    curve: curve,
+                    child: Image(
+                      image: const AssetImage('assets/compass/n.png'),
+                      height: 76 * scale,
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  left: 428 * scale,
+                  top: 227 * scale,
+                  child: AnimatedRotation(
+                    turns: -turns,
+                    duration: duration,
+                    curve: curve,
+                    child: Image(
+                      image: const AssetImage('assets/compass/e.png'),
+                      height: 76 * scale,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 214 * scale,
+                  top: 444 * scale,
+                  child: AnimatedRotation(
+                    turns: -turns,
+                    duration: duration,
+                    curve: curve,
+                    child: Image(
+                      image: const AssetImage('assets/compass/s.png'),
+                      height: 76 * scale,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0 * scale,
+                  top: 227 * scale,
+                  child: AnimatedRotation(
+                    turns: -turns,
+                    duration: duration,
+                    curve: curve,
+                    child: Image(
+                      image: const AssetImage('assets/compass/w.png'),
+                      height: 76 * scale,
+                    ),
+                  ),
+                ),
+                if (nearestCreature.creature != null)
+                  Positioned(
+                    left: (creatureX + (compassSize / 2) - 35),
+                    top: (-creatureY + (compassSize / 2) - 35),
+                    child: AnimatedRotation(
+                      turns: -turns,
+                      duration: duration,
+                      curve: curve,
+                      child: Image.network(
+                        dotenv.env['API_ROOT']! +
+                            nearestCreature.creature!.species.image,
+                        height: 70,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
-    );
+          );
+        });
   }
 
-  ///calculating compass turn from heading value
-  getCompassValues(double heading) {
-    double direction = heading;
-    direction = direction < 0 ? (360 + direction) : direction;
+  CompassModel getCompassValues(double heading) {
+    // Normalize heading to 0-360° range
+    double normalizedHeading = heading % 360;
+    if (normalizedHeading < 0) normalizedHeading += 360;
 
-    double diff = direction - previousHeading;
-    if (diff.abs() > 180) {
-      if (previousHeading > direction) {
-        diff = 360 - (direction - previousHeading).abs();
-      } else {
-        diff = (360 - (previousHeading - direction).abs()).toDouble();
-        diff = diff * -1;
-      }
+    // Calculate the shortest angle difference
+    double diff = normalizedHeading - previousHeading;
+    if (diff > 180) {
+      diff -= 360; // Crossed 360° clockwise
+    } else if (diff < -180) {
+      diff += 360; // Crossed 0° counter-clockwise
     }
-    turns += (diff / 360);
-    previousHeading = direction;
-    return CompassModel(turns: turns, angle: heading);
+
+    // Update total turns
+    turns -= diff / 360;
+
+    // Store the current heading as the previous heading
+    previousHeading = normalizedHeading;
+
+    return CompassModel(turns: turns, angle: normalizedHeading);
   }
 }
 

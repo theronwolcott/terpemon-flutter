@@ -1,5 +1,5 @@
 import 'package:latlong2/latlong.dart';
-import 'package:terpiez/creature_state.dart';
+import 'creature_state.dart';
 import 'package:weather_animation/weather_animation.dart';
 
 class Creature {

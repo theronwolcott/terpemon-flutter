@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:terpiez/creature.dart';
+import 'creature.dart';
 
 class NearestCreature {
   Creature? creature;

@@ -1,7 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:terpiez/location_state.dart';
+import 'package:weather_animation/weather_animation.dart';
+import 'location_state.dart';
 
 import 'catch_creature.dart';
 import 'compass.dart';
@@ -16,51 +17,51 @@ class TakePictureScreen extends StatefulWidget {
     required this.camera,
   });
 
-  final CameraDescription camera;
+  final CameraDescription? camera;
 
   @override
   TakePictureScreenState createState() => TakePictureScreenState();
 }
 
 class TakePictureScreenState extends State<TakePictureScreen> {
-  late CameraController _controller;
+  late CameraController? _controller;
   late Future<void> _initializeControllerFuture;
 
   @override
   void initState() {
     super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
-    _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
-      widget.camera,
-      // Define the resolution to use.
-      ResolutionPreset.high,
-    );
 
-    // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize();
+    if (widget.camera != null) {
+      _controller = CameraController(
+        widget.camera!,
+        ResolutionPreset.high,
+      );
+      _initializeControllerFuture = _controller!.initialize();
+    } else {
+      _controller = null;
+    }
   }
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   Future<void> handleCatch(Creature creature) async {
-    print("handleCatch()");
+    // print("handleCatch()");
+    XFile? image;
     try {
-      // Ensure that the camera is initialized.
-      await _initializeControllerFuture;
+      if (_controller != null) {
+        // Ensure that the camera is initialized.
+        await _initializeControllerFuture;
 
-      // Attempt to take a picture and get the file `image`
-      // where it was saved.
-      final image = await _controller.takePicture();
+        // Attempt to take a picture and get the file `image`
+        // where it was saved.
+        image = await _controller!.takePicture();
 
-      if (!context.mounted) return;
-
+        if (!context.mounted) return;
+      }
       // If the picture was taken, display it on a new screen.
       await Navigator.of(context).push(
         MaterialPageRoute(
@@ -80,33 +81,35 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          // child: WeatherScene.sunset.sceneWidget),
-          child: FutureBuilder<void>(
+        if (_controller != null)
+          FutureBuilder<void>(
             future: _initializeControllerFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                // If the Future is complete, display the preview.
-                return FittedBox(
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: _controller.value.previewSize!
-                        .height, // Swap width and height for rotation
-                    width: _controller.value.previewSize!.width,
+                final previewSize = _controller!.value.previewSize!;
+                final deviceRatio = MediaQuery.of(context).size.aspectRatio;
+                final previewRatio = previewSize.height / previewSize.width;
 
-                    child: CameraPreview(_controller),
+                return Transform.scale(
+                  scale: previewRatio > deviceRatio
+                      ? previewRatio / deviceRatio
+                      : deviceRatio / previewRatio,
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: previewRatio,
+                      child: CameraPreview(_controller!),
+                    ),
                   ),
                 );
               } else {
-                // Otherwise, display a loading indicator.
                 return const Center(child: CircularProgressIndicator());
               }
             },
-          ),
-        ),
+          )
+        else
+          WeatherScene.sunset.sceneWidget,
+        // Container(color: Colors.white), // White background when no camera.
+
         Center(
           child: Column(
             children: [

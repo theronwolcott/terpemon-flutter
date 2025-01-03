@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
-import 'package:terpiez/background_monitor.dart';
-import 'package:terpiez/creature_state.dart';
-import 'package:terpiez/list_tab.dart';
-import 'package:terpiez/user_state.dart';
+import 'background_monitor.dart';
+import 'creature_state.dart';
+import 'list_tab.dart';
+import 'user_state.dart';
 import 'globals.dart';
 import 'location_state.dart';
 import 'take_picture_screen.dart';
 import 'terpemon_map.dart';
-import 'main_tab.dart';
 
 // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 //     FlutterLocalNotificationsPlugin();
@@ -35,14 +34,14 @@ Future main() async {
   //   },
   // );
   final cameras = await availableCameras();
-  final firstCamera = cameras.first;
+  final CameraDescription? firstCamera = cameras.isEmpty ? null : cameras.first;
   await dotenv.load(fileName: '.env');
   runApp(MyApp(camera: firstCamera));
 }
 
 class MyApp extends StatefulWidget {
-  MyApp({super.key, required this.camera});
-  final CameraDescription camera;
+  const MyApp({super.key, required this.camera});
+  final CameraDescription? camera;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -80,6 +79,11 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
           scaffoldMessengerKey: scaffoldMessengerKey,
           title: 'Terpémon',
+          theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+            seedColor: Color.fromARGB(255, 224, 58, 62),
+            brightness: Brightness.light,
+          )),
           home: Scaffold(
             drawer: Drawer(
               child: ListView(
@@ -88,7 +92,7 @@ class _MyAppState extends State<MyApp> {
                 children: const [
                   DrawerHeader(
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 73, 86, 97),
+                      color: Color.fromARGB(255, 224, 58, 62),
                     ),
                     child: Text('Settings'),
                   ),
@@ -133,16 +137,16 @@ class _MyAppState extends State<MyApp> {
               },
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.format_list_numbered),
-                  label: 'Stats',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.map),
+                  icon: Icon(Icons.explore),
                   label: 'Finder',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.system_update),
-                  label: 'Caught',
+                  icon: Icon(Icons.map),
+                  label: 'Map',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.pets),
+                  label: 'Creatures',
                 ),
               ],
             ),

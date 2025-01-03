@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:rxdart/rxdart.dart';
 
 class LocationState extends ChangeNotifier {
   static final LocationState _instance = LocationState._internal();
@@ -35,9 +37,12 @@ class LocationState extends ChangeNotifier {
     Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.high,
-    )).listen((position) {
+    )).throttleTime(Duration(milliseconds: 500)).listen((position) {
       _currentPosition = position;
-      //debugPrint(_currentPosition.toString());
+      if (_currentPosition != null) {
+        // debugPrint(
+        //     "${_currentPosition!.heading.toString()}; ${_currentPosition!.headingAccuracy.toString()}");
+      }
       notifyListeners();
 
       // If a Completer exists, complete it with the new position

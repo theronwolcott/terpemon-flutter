@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:terpiez/user_state.dart';
+import 'user_state.dart';
 
 class ApiService {
   // Fetch a list of objects from the API

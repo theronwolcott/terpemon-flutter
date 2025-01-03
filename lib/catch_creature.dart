@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:Terpemon/user_state.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'animated_bouncing_creature.dart';
 import 'creature.dart';
 import 'creature_state.dart';
@@ -9,11 +12,11 @@ import 'creature_state.dart';
 class CatchCreature extends StatefulWidget {
   const CatchCreature({
     super.key,
-    required this.image,
+    this.image,
     required this.creature,
   });
 
-  final XFile image;
+  final XFile? image;
   final Creature creature;
 
   @override
@@ -41,6 +44,7 @@ class _CatchCreatureState extends State<CatchCreature> {
 
   @override
   void initState() {
+    super.initState();
     game = CatchGame(
         bestOf: widget.creature.species.bestOf,
         creatureWinPct: widget.creature.species.winPct);
@@ -57,6 +61,7 @@ class _CatchCreatureState extends State<CatchCreature> {
   void shoot(RockPaperScissors user) {
     if (!canShoot) return;
     canShoot = false;
+    HapticFeedback.lightImpact();
     setState(() {
       var (hand, roundResult, status) = game.shoot(user);
       creatureHand = hand.name;
@@ -86,6 +91,7 @@ class _CatchCreatureState extends State<CatchCreature> {
         //Lost
         currentColors = ["gray", "gray", "gray"];
         creatureVisible = false;
+        HapticFeedback.vibrate();
       } else if (game.status.result == 1) {
         //Won
         currentColors = ["gray", "gray", "gray"];
@@ -96,9 +102,20 @@ class _CatchCreatureState extends State<CatchCreature> {
     if (game.status.result != 0) {
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
+          if (game.status.result == -1) {
+            _playSound("pop");
+          }
           Navigator.of(context).pop();
         }
       });
+    }
+  }
+
+  Future<void> _playSound(String sound) async {
+    if (UserState().isSoundOn) {
+      final AudioPlayer audioPlayer = AudioPlayer();
+      await audioPlayer.play(AssetSource('sounds/$sound.mp3'));
+      audioPlayer.dispose();
     }
   }
 
@@ -110,8 +127,12 @@ class _CatchCreatureState extends State<CatchCreature> {
       // constructor with the given path to display the image.
       body: Stack(children: [
         Positioned.fill(
-            child: Image(
-                image: FileImage(File(widget.image.path)), fit: BoxFit.cover)),
+            // child: (true)
+            child: (widget.image == null)
+                ? widget.creature.species.weather.sceneWidget
+                : Image(
+                    image: FileImage(File(widget.image!.path)),
+                    fit: BoxFit.cover)),
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

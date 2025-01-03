@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
-import 'package:terpiez/creature.dart';
-import 'package:terpiez/main.dart';
+import 'creature.dart';
+import 'main.dart';
 
 import 'creature_state.dart';
 import 'location_state.dart';

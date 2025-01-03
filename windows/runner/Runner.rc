@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "terpiez" "\0"
+            VALUE "FileDescription", "terpemon" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "terpiez" "\0"
+            VALUE "InternalName", "terpemon" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "terpiez.exe" "\0"
-            VALUE "ProductName", "terpiez" "\0"
+            VALUE "OriginalFilename", "terpemon.exe" "\0"
+            VALUE "ProductName", "terpemon" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
