@@ -175,5 +175,5 @@ class Captured {
 
 Theron Wolcott - theronwolcott@gmail.com
 
-Project Link: [https://github.com/theronwolcott/terpemon-flutter](https://github.com/yourusername/terpemon-flutter)
+Project Link: [https://github.com/theronwolcott/terpemon-flutter](https://github.com/yourusername/terpemon-flutter)  
 Back-End Link: [https://github.com/theronwolcott/terpemon-node](https://github.com/yourusername/terpemon-node)
