@@ -2,7 +2,7 @@
 
 <img align="right" width="365" height="720" src="images/Sequence_01.gif">
 
-A location-based augmented reality mobile game inspired by Pokémon GO, themed around the University of Maryland campus. Players can explore the campus to find, catch, and collect unique creatures using their mobile device's camera and location services. I developed both the front-end (this project, for iOS and Android) and the back-end (in Node, with MongoDB).
+A location-based augmented reality mobile game inspired by Pokémon GO, themed around the University of Maryland. Players can explore the world around them -- anywhere on Earth -- to find, catch and collect unique creatures using their mobile device's camera and location services. I developed both the front-end (this project, for iOS and Android) and the back-end (in Node, with MongoDB).
 
 Back-End Project: https://github.com/theronwolcott/terpemon-node
 
