@@ -1,13 +1,12 @@
 # Terpémon (AR Mobile Game)
 
-<div style="float: right; margin-left 20px; margin-bottom: 10px; width: 365px;">
-<img width="365" height="720" src="images/Sequence_01.gif">
-</div>
- A location-based augmented reality mobile game inspired by Pokémon GO, themed around the University of Maryland campus. Players can explore the campus to find, catch, and collect unique creatures using their mobile device's camera and location services. I developed both the front-end (this project, for iOS and Android) and the back-end (in Node, with MongoDB).
+<img align="right" width="365" height="720" src="images/Sequence_01.gif">
+
+A location-based augmented reality mobile game inspired by Pokémon GO, themed around the University of Maryland campus. Players can explore the campus to find, catch, and collect unique creatures using their mobile device's camera and location services. I developed both the front-end (this project, for iOS and Android) and the back-end (in Node, with MongoDB).
 
 Back-End Project: https://github.com/theronwolcott/terpemon-node
 
-## Features
+### Features
 
 - **Real-time Location Tracking**: Uses GPS to track player movement and discover nearby creatures
 - **Augmented Reality**: Catch creatures using your device's camera in an augmented reality experience
@@ -17,7 +16,7 @@ Back-End Project: https://github.com/theronwolcott/terpemon-node
 - **Weather Integration**: Each creature has preferred weather conditions
 - **Compass Navigation**: Use the built-in compass to home in on the nearest creature as you get close
 
-## Technical Implementation
+### Technical Implementation
 
 - **State Management**: Uses Provider pattern for efficient state management across the application
 - **Location Services**: Implements Geolocator for precise GPS tracking and distance/heading calculations
@@ -111,7 +110,7 @@ class Captured {
 - Manages the tab controller and owns the hamburger menu
 - Wires up the three **Providers** to make it easy for sub-views to watch for, and react to, state changes: **UserState()**, **LocationState()** and **CreatureState()**
 
-### Finder (AR) Tab [./lib/artest.dart](./lib/artest.dart)
+### Finder (AR) Tab [./lib/ar.dart](./lib/ar.dart)
 
 - Owns the ARKit implementation as the primary view
 - Subscribes to **LocationState()** and **CreatureState()** changes to update the "nearest creature" as state changes
