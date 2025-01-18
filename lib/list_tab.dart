@@ -14,8 +14,11 @@ class ListTab extends StatefulWidget {
 }
 
 class _ListTabState extends State<ListTab> {
+  // Creatures we've caught before
   late List<Captured> caught;
+  // List of all species so you can see basic info even if you haven't caught
   late List<CreatureSpecies> species;
+  // Are you on all species or ones you've caught
   int _selectedIndex = 0;
 
   @override
@@ -26,8 +29,10 @@ class _ListTabState extends State<ListTab> {
 
   Future<void> fetchData() async {
     var apiService = ApiService();
+    // Get captured list for this person
     caught = await apiService.fetchList<Captured>(
       'creatures/list-captured',
+      // Wrap the captured creatures with their time and weather
       (data) => Captured.fromMap(data),
     );
   }
@@ -39,8 +44,10 @@ class _ListTabState extends State<ListTab> {
         // CupertinoSegmentedControl
         Padding(
           padding: const EdgeInsets.all(8.0),
+          // Where you look at all species or ones you've caught
           child: CupertinoSegmentedControl<int>(
             groupValue: _selectedIndex,
+            // Update selectedIndex when you tap
             onValueChanged: (index) {
               setState(() {
                 _selectedIndex = index;
@@ -64,11 +71,16 @@ class _ListTabState extends State<ListTab> {
               ? FutureBuilder<void>(
                   future: fetchData(),
                   builder: (context, snapshot) {
+                    // Loading image if still connecting
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     } else {
+                      /* To make sure we only have one of every creature even if we've caught more.
+                      Map gets just the species from the creatures we've caught. The toSet gets rid of duplicates.
+                      Now we should have a list of only one for each species we've caught. Then we have to 
+                      turn it back into a list */
                       var caughtSpeciesList = caught
                           .map((element) => element.creature.species)
                           .toSet()
@@ -79,6 +91,7 @@ class _ListTabState extends State<ListTab> {
                     }
                   },
                 )
+              // If selectedIndex is 0 we do the species
               : _buildListView(species),
         ),
       ],
@@ -102,12 +115,14 @@ class _ListTabState extends State<ListTab> {
                   ),
                 ),
                 trailing: const Icon(Icons.chevron_right),
+                // Open each creatures CreatureDetails page when we click on a ListTile
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => CreatureDetails(
                         species: list[index],
+                        // We want to send across the list of caught so that we can see it on the caught page
                         caught: _selectedIndex == 1
                             ? caught
                                 .where((c) =>

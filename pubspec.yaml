@@ -59,6 +59,8 @@ dependencies:
   flutter_compass: ^0.8.1
   rxdart: ^0.28.0
   audioplayers: ^6.1.0
+  vector_math: ^2.1.4
+  arkit_plugin: ^1.1.1
 
 dev_dependencies:
   flutter_test:

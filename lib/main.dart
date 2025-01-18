@@ -5,11 +5,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'background_monitor.dart';
 import 'creature_state.dart';
+import 'finder_tab.dart';
 import 'list_tab.dart';
 import 'user_state.dart';
 import 'globals.dart';
 import 'location_state.dart';
-import 'take_picture_screen.dart';
 import 'terpemon_map.dart';
 
 // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -26,6 +26,7 @@ int initTabIndex = 0;
 bool isForeground = true;
 
 Future main() async {
+  // Make sure widgets are initialized
   WidgetsFlutterBinding.ensureInitialized();
   // await flutterLocalNotificationsPlugin.initialize(
   //   initializationSettings,
@@ -33,7 +34,10 @@ Future main() async {
   //     initTabIndex = 1;
   //   },
   // );
+
+  // Find available cameras from device (simulator has none)
   final cameras = await availableCameras();
+  // If there are cameras, use the first one. iPhone primary 1x camera should be first
   final CameraDescription? firstCamera = cameras.isEmpty ? null : cameras.first;
   await dotenv.load(fileName: '.env');
   runApp(MyApp(camera: firstCamera));
@@ -41,6 +45,7 @@ Future main() async {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key, required this.camera});
+  // Nullable so can work with simulator
   final CameraDescription? camera;
 
   @override
@@ -48,12 +53,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // Manages what goes in main content window
   late final PageController _pageController;
 
+  // Get reference to Providers to inject into widget tree
   final _creatureState = CreatureState();
   final _userState = UserState();
   final _locationState = LocationState();
 
+  // Which tab is active
   int _selectedIndex = 0; //New
 
   @override
@@ -71,6 +79,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
+      // Inject state Providers into widget tree
       providers: [
         ChangeNotifierProvider<CreatureState>(create: (_) => _creatureState),
         ChangeNotifierProvider<UserState>(create: (_) => _userState),
@@ -85,6 +94,7 @@ class _MyAppState extends State<MyApp> {
             brightness: Brightness.light,
           )),
           home: Scaffold(
+            // Hamburger menu in top left
             drawer: Drawer(
               child: ListView(
                 // Important: Remove any padding from the ListView.
@@ -105,6 +115,7 @@ class _MyAppState extends State<MyApp> {
               title: const Text('Terpémon'),
             ),
             floatingActionButton: const BackgroundMonitor(),
+            // This is how we open specific tabs
             body: PageView(
               controller: _pageController,
               onPageChanged: (int index) {
@@ -112,29 +123,28 @@ class _MyAppState extends State<MyApp> {
                   _selectedIndex = index;
                 });
               },
+              // Actual children of the PageView, the widgets that match the main tabs
               children: [
-                // const StatisticsTab(),
-                // const MainTab(),
-                TakePictureScreen(
-                  camera: widget.camera,
-                ),
+                // TakePictureScreen(
+                //   camera: widget.camera,
+                // ),
+                FinderTab(),
                 TerpemonMap(),
                 ListTab(),
               ],
             ),
+            // Manages tabs and tells the PageController when someone taps a new tab
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: _selectedIndex,
               onTap: (int index) {
                 _pageController.jumpToPage(
-                  // _pageController.animateToPage(
                   index,
-                  // duration: const Duration(milliseconds: 300),
-                  // curve: Curves.easeInOut,
                 );
                 setState(() {
                   _selectedIndex = index;
                 });
               },
+              // The actual tabs along the bottom
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.explore),
@@ -177,7 +187,7 @@ class ResetUserPrefs extends StatelessWidget {
                   child: const Text('Cancel')),
               TextButton(
                 onPressed: () {
-                  //erase
+                  // Reset the user and creature state
                   userState.reset();
                   creatureState.resetCreatures();
                   Navigator.of(context).pop();

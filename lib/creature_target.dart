@@ -10,6 +10,7 @@ import 'location_state.dart';
 import 'nearest_creature.dart';
 
 class CreatureTarget extends StatefulWidget {
+  // We call this function when they click the catch button, passing back the current creature
   final Function(Creature) catchCallback;
   const CreatureTarget({super.key, required this.catchCallback});
 
@@ -18,6 +19,7 @@ class CreatureTarget extends StatefulWidget {
 }
 
 class _CreatureTargetState extends State<CreatureTarget> {
+  // Hold left to right offset and compass heading as they change
   double previousOffsetX = 0;
   double compassHeading = 0;
   StreamSubscription<CompassEvent>? _compassSubscription;
@@ -25,6 +27,7 @@ class _CreatureTargetState extends State<CreatureTarget> {
   @override
   void initState() {
     super.initState();
+    // Update compassHeading with current heading while widget is open
     _compassSubscription = FlutterCompass.events?.listen((event) {
       setState(() {
         if (mounted) {
@@ -44,7 +47,9 @@ class _CreatureTargetState extends State<CreatureTarget> {
   @override
   Widget build(BuildContext context) {
     // Duration duration = const Duration(milliseconds: 300);
+    // Is catch button visible or not
     bool visible = false;
+    // Rebuild if location or creatures change
     var locationState = context.watch<LocationState>();
     var creatureState = context.watch<CreatureState>();
 
@@ -52,37 +57,49 @@ class _CreatureTargetState extends State<CreatureTarget> {
         NearestCreature(creatureState.wild, locationState.currentPosition);
 
     double distance = nearestCreature.distance;
+    // Only show at all if within 250 meters
     if (distance > 250) {
+      // Invisible box
       return SizedBox(
         height: 10,
         width: 10,
       );
     }
+    // Start as full size
     double scale = 1.0;
+    // If further than 100m, make him tiny
     if (distance > 100) {
       scale = 0.2;
     } else if (distance >= 10) {
+      // Gradually scale him up from 0.2 to 1.0 scale from 100m -> 10m
       scale = 1.0 - ((distance - 10) / 90) * 0.8;
     }
 
     // double compassHeading = locationState.currentPosition?.heading ?? 0;
     double creatureBearing = nearestCreature.bearing;
     // debugPrint("creatureBearing: $creatureBearing");
+    // Combining the compass heading and nearest creature bearing to find out what
+    // direction the creature is relative to where we're facing
     double creatureHeading = -(compassHeading - creatureBearing);
     if (creatureHeading > 180) creatureHeading -= 360;
     if (creatureHeading < -180) creatureHeading += 360;
 
     int span = 15;
+    // Figure out how many degrees we want to show on camera
     double offsetX = creatureHeading / span / 2;
 
     // debugPrint("$creatureHeading; $offsetX");
 
+    // On screen is anywhere between -1 and 1 based on animationOffset
+    // We want to show it only in the middle 20% of the screen
+    // And, if he is within 25m, we can show the button
     if (offsetX > -0.2 && offsetX < 0.2 && distance < 25) {
       visible = true;
     } else {
       visible = false;
     }
 
+    // If there isn't a nearest creature for some reason
     if (nearestCreature.creature == null) {
       return const SizedBox(height: 150, width: 150);
     }
@@ -90,9 +107,12 @@ class _CreatureTargetState extends State<CreatureTarget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        // The creature actually exists here
         SizedBox(
+          //  The whole size of the screen
           width: MediaQuery.of(context).size.width,
           height: 300,
+          // Flutter animation control that animates from one point to another
           child: TweenAnimationBuilder(
             tween: Tween<double>(
               begin: previousOffsetX,
@@ -131,7 +151,7 @@ class _CreatureTargetState extends State<CreatureTarget> {
           child: ElevatedButton(
             child: Text("Catch ${nearestCreature.creature!.species.name}"),
             onPressed: () {
-              print("Catch");
+              // print("Catch");
               widget.catchCallback(nearestCreature.creature!);
             },
           ),

@@ -7,6 +7,7 @@ class NearestCreature {
   double bearing = 0;
 
   NearestCreature(List<Creature> list, Position? position) {
+    // Which creature is closest to given position
     if (position != null && list.isNotEmpty) {
       for (var c in list) {
         var d = Geolocator.distanceBetween(c.location.latitude,
@@ -16,6 +17,7 @@ class NearestCreature {
           distance = d;
         }
       }
+      // Only use this in the compass
       bearing = Geolocator.bearingBetween(position.latitude, position.longitude,
           creature!.location.latitude, creature!.location.longitude);
     }

@@ -10,7 +10,11 @@ class Creature {
 
   Creature(this.location, this.species, this.hash, this.name);
 
+  /* Constructor takes a map of what the JSON is translated into before it is strongly typed,
+   and makes a creature object from it */
   factory Creature.fromMap(Map<String, dynamic> map) {
+    // Get a species object based on the id of the current map
+    // Lookup takes an id and gets a single CreatureSpecies object back
     var species = CreatureState().lookup(map['id']);
     return Creature(
         LatLng(map['lat'], map['lng']), species, map['hash'], map['name']);
@@ -23,6 +27,7 @@ class Creature {
     return s;
   }
 
+  // May not need this
   Map<String, dynamic> toJson() => {
         'location': location.toJson(),
         'species': species.toJson(),
@@ -31,6 +36,7 @@ class Creature {
       };
 }
 
+/* For a creature we've captured, give it a timestamp and weather */
 class Captured {
   DateTime timestamp;
   int weather_code;
@@ -57,6 +63,7 @@ class Captured {
       };
 }
 
+/* CreatureSpecies is how we are taking in creatures from the server */
 class CreatureSpecies {
   int id;
   String name;
@@ -69,12 +76,19 @@ class CreatureSpecies {
 
   CreatureSpecies(this.id, this.name, this.description, this.image, this.bestOf,
       this.winPct, this.stats) {
+    // Choosing a weather based on the hash of the name
     weather = WeatherScene.values[name.hashCode % WeatherScene.values.length];
   }
 
-  factory CreatureSpecies.fromMap(Map<String, dynamic> map, int id) {
-    return CreatureSpecies(id, map['name'], map['description'], map['image'],
-        map['bestOf'], map['winPct'], CreatureStats.fromMap(map['stats']));
+  factory CreatureSpecies.fromMap(Map<String, dynamic> map) {
+    return CreatureSpecies(
+        map['id'],
+        map['name'],
+        map['description'],
+        map['image'],
+        map['bestOf'],
+        map['winPct'],
+        CreatureStats.fromMap(map['stats']));
   }
 
   Map<String, dynamic> toJson() => {

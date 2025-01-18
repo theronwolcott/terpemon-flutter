@@ -34,6 +34,7 @@ class _AnimatedBouncingCreatureState extends State<AnimatedBouncingCreature>
   Widget build(BuildContext context) {
     return TweenAnimationBuilder(
       key: _key,
+      // Over 3 seconds, go from 0 to 2pi, call builder every frame
       duration: const Duration(seconds: 3),
       tween: Tween<double>(begin: 0, end: 2 * pi),
       builder: (BuildContext context, double value, Widget? child) {
@@ -41,12 +42,15 @@ class _AnimatedBouncingCreatureState extends State<AnimatedBouncingCreature>
         double dx = sin(value) * 10;
 
         // Vertical bounce (twice as fast)
+        // Two up and downs for every right to left
         double dy = sin(value * 2) * 10;
 
+        // Move creature around every frame based on his offsets
         return Transform.translate(
           offset: Offset(dx, dy),
           child: SimpleShadow(
             opacity: 0.25,
+            // If we want to use a bouncy creature anywhere else, we have to make this value not fixed
             offset: const Offset(5, 5),
             sigma: 5,
             child: Image.network(

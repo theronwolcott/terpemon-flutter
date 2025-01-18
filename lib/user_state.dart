@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class UserState extends ChangeNotifier {
+  /* UserState tracks the user's id, whether or not they have sound on,
+  and if they want to reset their account */
   static final UserState _instance = UserState._internal();
 
   factory UserState() => _instance;

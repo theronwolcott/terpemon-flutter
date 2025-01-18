@@ -15,8 +15,8 @@ class CatchCreature extends StatefulWidget {
     this.image,
     required this.creature,
   });
-
-  final XFile? image;
+  // Nullable incase we don't have a camera image to shows
+  final ImageProvider? image;
   final Creature creature;
 
   @override
@@ -28,8 +28,11 @@ class _CatchCreatureState extends State<CatchCreature> {
   late CatchGame game;
   late String creatureText;
   String creatureHand = "paper";
+  // Can you see the creature or not
   bool creatureVisible = true;
+  // Can you see its hand
   bool creatureHandVisible = false;
+  // The jail when you catch it
   bool jailVisible = false;
   static const colors = {
     "blue": Color.fromARGB(255, 23, 137, 178),
@@ -38,17 +41,22 @@ class _CatchCreatureState extends State<CatchCreature> {
     "gray": Color.fromARGB(255, 121, 121, 121),
   };
   var currentColors = ["blue", "yellow", "red"];
+  // Are you allowed to tap the button
   bool canShoot = true;
 
   _CatchCreatureState();
 
+  // Do this when the widget is first built
   @override
   void initState() {
     super.initState();
+    // Start our game with the creature's stats
     game = CatchGame(
         bestOf: widget.creature.species.bestOf,
         creatureWinPct: widget.creature.species.winPct);
+    // Make it display its name
     creatureText = "I'm ${widget.creature.name}";
+    // Display its name for two seconds only
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
@@ -58,21 +66,30 @@ class _CatchCreatureState extends State<CatchCreature> {
     });
   }
 
+  /* When the user actually taps the button to play something */
   void shoot(RockPaperScissors user) {
     if (!canShoot) return;
     canShoot = false;
+    // Static, makes a little vibration
     HapticFeedback.lightImpact();
+    // For a stateful widget, we do these things in a setstate so it rebuilds immediately with them
     setState(() {
-      var (hand, roundResult, status) = game.shoot(user);
-      creatureHand = hand.name;
+      // Call the shoot function on the game with whatever hand we played
+      var (creatureThrew, roundResult, status) = game.shoot(user);
+      // Creature's hand
+      creatureHand = creatureThrew.name;
+      // Display it
       creatureHandVisible = true;
+      // Use returned game status
       creatureText = status.roundText;
       for (var hand in RockPaperScissors.values) {
+        // Set the values in the colors array to be gray for the one we didn't pick
         if (hand != user) {
           currentColors[hand.index] = "gray";
         }
       }
-    });
+    }); // Rebuild with this stuff ^
+    // 2 seconds later, we go back to the default state (game state)
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         resetState();
@@ -82,8 +99,11 @@ class _CatchCreatureState extends State<CatchCreature> {
 
   void resetState() {
     setState(() {
+      // Go back to displaying the score instead of its reaction to throw
       creatureText = game.status.gameText;
+      // Don't want to see its hand anymore
       creatureHandVisible = false;
+      // Game is still going, we want to be able to play another round
       if (game.status.result == 0) {
         currentColors = ["blue", "yellow", "red"];
         canShoot = true;
@@ -96,9 +116,11 @@ class _CatchCreatureState extends State<CatchCreature> {
         //Won
         currentColors = ["gray", "gray", "gray"];
         jailVisible = true;
+        // We call the catch method here
         creatureState.catchCreature(widget.creature);
       }
     });
+    // If game is over, we want to pop the widget off the screen
     if (game.status.result != 0) {
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
@@ -126,18 +148,18 @@ class _CatchCreatureState extends State<CatchCreature> {
       // The image is stored as a file on the device. Use the `Image.file`
       // constructor with the given path to display the image.
       body: Stack(children: [
+        // Background
         Positioned.fill(
             // child: (true)
             child: (widget.image == null)
                 ? widget.creature.species.weather.sceneWidget
-                : Image(
-                    image: FileImage(File(widget.image!.path)),
-                    fit: BoxFit.cover)),
+                : Image(image: widget.image!, fit: BoxFit.cover)),
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
+              // What is the creature saying
               creatureText,
               style: const TextStyle(
                   color: Colors.white,
@@ -158,11 +180,13 @@ class _CatchCreatureState extends State<CatchCreature> {
                 maintainSize: true,
                 maintainAnimation: true,
                 maintainState: true,
+                // Creature itself is displayed here
                 child: AnimatedBouncingCreature(
                   species: widget.creature.species,
                   size: 350.0,
                 ),
               ),
+              // Jail displayed here
               Visibility(
                 visible: jailVisible,
                 child: Image.asset(
@@ -183,6 +207,7 @@ class _CatchCreatureState extends State<CatchCreature> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // Rock button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: MaterialButton(
@@ -200,6 +225,7 @@ class _CatchCreatureState extends State<CatchCreature> {
                         ),
                       ),
                     ),
+                    // Paper button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: MaterialButton(
@@ -217,6 +243,7 @@ class _CatchCreatureState extends State<CatchCreature> {
                         ),
                       ),
                     ),
+                    // Scissors button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: MaterialButton(
@@ -236,7 +263,9 @@ class _CatchCreatureState extends State<CatchCreature> {
                     ),
                   ],
                 ),
+                // The creatures hand if we want to display it over the middle button
                 Positioned(
+                  // 60 above where it would normally be
                   bottom: 60,
                   child: Visibility(
                     visible: creatureHandVisible,
@@ -267,16 +296,18 @@ class CatchGameStatus {
   int user = 0;
   int computer = 0;
   int result = 0;
+  // Displays the message after each round
   String roundText = "";
+  // Displays the score when game is in waiting
   String gameText = "";
 }
 
 class CatchGame {
   final int bestOf;
   final double creatureWinPct;
-  static final Random _random = Random(); // Static random generator
+  // Static random generator
+  static final Random _random = Random();
   CatchGameStatus status = CatchGameStatus();
-
   CatchGame({this.bestOf = 1, this.creatureWinPct = 0.5}) {
     if (bestOf > 1) {
       status.gameText = "Best of $bestOf";
@@ -288,60 +319,74 @@ class CatchGame {
     status = CatchGameStatus();
   }
 
+  // When the user actually picks a button we do this
   (RockPaperScissors, int, CatchGameStatus) shoot(RockPaperScissors user) {
     var majority = (bestOf / 2).ceil();
+    // Random double between 0 and 1
     var x = _random.nextDouble(); // Use static random instance
+    /* 66% of rounds end in a non-tie. Here, we are calculating the chance the creature wins.
+    Because 66% of rounds are a non-tie, we portion it out based on the chance of the 
+    creature winning */
     var winLevel = creatureWinPct * 0.667;
+    // Always 33% chance for a tie
     var tieLevel = winLevel + 0.333;
+    // Track which RPS we want the computer to play
     RockPaperScissors computer;
     int roundResult;
+    // If we generate within 0 to the creature's winLevel, it wins
     if (x < winLevel) {
+      // Choose the next value in the enum because creature won
       computer = RockPaperScissors.values[(user.index + 1) % 3];
       roundResult = -1;
+      // Update the creature's score
       status.computer++;
+      // If they win now
       if (status.computer >= majority) {
+        // Creature won full game
         status.result = -1;
         status.gameText = "I've Escaped";
       }
+      // In between winLevel and tieLevel, round is a tie
     } else if (x < tieLevel) {
+      // Play the same value
       computer = RockPaperScissors.values[user.index];
       roundResult = 0;
+      // User wins
     } else {
+      // Get the previous value
       computer = RockPaperScissors.values[(user.index - 1 + 3) % 3];
       roundResult = 1;
+      // Update user's score
       status.user++;
+      // If we win now
       if (status.user >= majority) {
+        // We win full game
         status.result = 1;
         status.gameText = "Caught! Nooo!";
       }
     }
+    // Set the roundText to the creature's reaction
     status.roundText = throwResult(status, roundResult, _random);
+    // Game is not over yet
     if (status.result == 0) {
+      // If the game is now tied after this round
       if (status.user == status.computer) {
         status.gameText = "Tied ${status.user}-${status.computer}";
       } else if (status.user > status.computer) {
+        // If we are now up
         status.gameText = "${status.user}-${status.computer} You";
       } else {
+        // If creature is now up
         status.gameText = "I'm up ${status.computer}-${status.user}";
       }
     }
+    // computer is so we can display what they played
+    // roundResult maybe unecessary
+    // status will inform the widget what to show
     return (computer, roundResult, status);
   }
 
-  int winner(RockPaperScissors user, RockPaperScissors computer) {
-    if (user == computer) return 0;
-    if (user == RockPaperScissors.rock) {
-      if (computer == RockPaperScissors.paper) return -1;
-    }
-    if (user == RockPaperScissors.paper) {
-      if (computer == RockPaperScissors.scissors) return -1;
-    }
-    if (user == RockPaperScissors.scissors) {
-      if (computer == RockPaperScissors.rock) return -1;
-    }
-    return 1;
-  }
-
+  /* Figure out what the creature says */
   static String throwResult(CatchGameStatus status, int result, Random random) {
     if (result == 0) {
       // tie
@@ -350,6 +395,7 @@ class CatchGame {
         'Same thought!',
         'Twins!',
       ];
+      // These randoms generate a random int from 0 to array length - 1
       return list[random.nextInt(list.length)];
     } else if (result == -1) {
       // creature won
@@ -374,6 +420,8 @@ class CatchGame {
   }
 }
 
+/* These are organized so the next one beats the previous one. So, 
+if we want someone to win, we just pick the next one from .values */
 enum RockPaperScissors {
   rock,
   paper,
