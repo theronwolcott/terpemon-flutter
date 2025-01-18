@@ -1,6 +1,8 @@
 # Terpémon (AR Mobile Game)
 
+<div style="float: right; margin-left 20px; margin-bottom: 10px; width: 365px;">
 <img align="right" width="365" height="720" src="images/Sequence_01.gif">
+</div>
  A location-based augmented reality mobile game inspired by Pokémon GO, themed around the University of Maryland campus. Players can explore the campus to find, catch, and collect unique creatures using their mobile device's camera and location services. I developed both the front-end (this project, for iOS and Android) and the back-end (in Node, with MongoDB).
 
 Back-End Project: https://github.com/theronwolcott/terpemon-node
