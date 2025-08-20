@@ -22,6 +22,7 @@ class UserState extends ChangeNotifier {
   late SharedPreferences prefs;
 
   Future<void> _loadUser() async {
+    // SharedPreferences saves this info locally (like a cookie)
     prefs = await SharedPreferences.getInstance();
     var uuidFromDisk = prefs.getString(uuidKey);
     var dateFromDisk = prefs.getString(dateKey);

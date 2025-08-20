@@ -8,6 +8,7 @@ class CreatureState extends ChangeNotifier {
   /* This is how we create a singleton */
   static final CreatureState _instance = CreatureState._internal();
 
+  // If someone tries to create another instance, it will return the existing one
   factory CreatureState() => _instance;
 
   CreatureState._internal() {
@@ -71,6 +72,7 @@ class CreatureState extends ChangeNotifier {
   }
 
   // Like findOne in js
+  // Pull the species object from its key (id)
   CreatureSpecies lookup(int id) {
     return _species.firstWhere((species) => species.id == id);
   }
@@ -83,6 +85,9 @@ class CreatureState extends ChangeNotifier {
     we go down from a regular scale to the scale we want */
     int lat = (((latitude * 1000) / step)).floor();
     int lng = (((longitude * 1000) / step)).floor();
+    // This isn't actually a lat and lng, it is a unique tile identifier that we are sending back
+    // BUT, that will be the same when we are within 0.02 lat and lng
+    // It is used to detect when a user moves to a new tile
     return (lat, lng);
   }
 

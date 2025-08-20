@@ -7,7 +7,8 @@ import 'package:rxdart/rxdart.dart';
 
 class LocationState extends ChangeNotifier {
   static final LocationState _instance = LocationState._internal();
-
+  /* This is how we create a singleton */
+  // If someone tries to create another instance, it will return the existing one
   factory LocationState() => _instance;
 
   LocationState._internal() {

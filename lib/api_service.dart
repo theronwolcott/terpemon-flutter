@@ -20,6 +20,7 @@ class ApiService {
     try {
       /* This is the body we are actually going to send, 
       we are injecting the user id if it exists and making it if not */
+      // IMPROVEMENT JWTs for authentication
       Map<String, dynamic> finalBody = body != null
           ? {
               ...body,
@@ -30,6 +31,7 @@ class ApiService {
       final response = await http.post(
         url,
         // Need headers to tell the server info it needs
+        // Standard, looking for JSON
         headers: {
           'Content-Type': 'application/json',
         },
@@ -49,6 +51,7 @@ class ApiService {
         that even though our response is a List<dynamic> that each thing in there (data)
         is going to be a Map<String, dynamic>. We know that we can assume each dynamic 
         will fit that pattern */
+        // Only difference between this and single is this maps a list, single decodes entire JSON object
         return responseData.map((data) => fromJson(data)).toList();
       } else {
         throw Exception(
@@ -141,6 +144,35 @@ class ApiService {
     } catch (e) {
       print('Error occurred: $e');
       return false; // Return false in case of an error
+    }
+  }
+
+  Future<String?> generateCreature(String prompt) async {
+    final url = Uri.parse("${dotenv.env['API_ROOT']!}/generate-creature");
+    String userId = UserState().id;
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'prompt': prompt,
+          'userId': userId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['imageUrl']; // or whatever key you return
+      } else {
+        throw Exception(
+            'Failed to generate creature. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error generating creature: $e');
+      return null;
     }
   }
 }
