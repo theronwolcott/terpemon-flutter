@@ -65,7 +65,7 @@ SPEC CHECKSUMS:
   arkit_plugin: 2c387e26e137de4bd1fc16ec2fabd05c84c5a817
   audioplayers_darwin: ccf9c770ee768abb07e26d90af093f7bab1c12ab
   camera_avfoundation: 04b44aeb14070126c6529e5ab82cc7c9fca107cf
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_compass: b236ab69b61545cce89fd58527f401a7587d5cc1
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   geolocator_apple: 1560c3c875af2a412242c7a923e15d0d401966ff
@@ -74,6 +74,6 @@ SPEC CHECKSUMS:
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
-PODFILE CHECKSUM: 8bd8273c76d1b0c83f276c624d5f5dc0d6aa0b98
+PODFILE CHECKSUM: df514d653bc689cb277d122f4dd83633dd452bbf
 
 COCOAPODS: 1.16.2

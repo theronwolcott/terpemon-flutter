@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>MinimumOSVersion</key>
-	<string>14.0</string>
-	<key>NSCameraUsageDescription</key>
-	<string>your usage description here</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>your usage description here</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -32,14 +26,25 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
+	<key>MinimumOSVersion</key>
+	<string>14.0</string>
+	<key>NSCameraUsageDescription</key>
+	<string>your usage description here</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need your location for...</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>We need your location for...</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location for...</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>your usage description here</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>audio</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -57,10 +62,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	    <key>UIBackgroundModes</key>
-    <array>
-        <string>location</string>
-		<string>audio</string>
-    </array>
 </dict>
 </plist>

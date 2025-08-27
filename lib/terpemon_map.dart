@@ -12,7 +12,7 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'nearest_creature.dart';
 
 class TerpemonMap extends StatefulWidget {
-  TerpemonMap({super.key});
+  const TerpemonMap({super.key});
 
   @override
   State<TerpemonMap> createState() => _TerpemonMapState();
@@ -103,10 +103,34 @@ class _TerpemonMapState extends State<TerpemonMap> {
         ),
       ),
       children: [
+        // Option 1: CartoDB Positron (Light theme, good for mobile)
         TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.example.app',
+          urlTemplate:
+              'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+          userAgentPackageName: 'dev.terpemon.app',
+          subdomains: const ['a', 'b', 'c'],
+          additionalOptions: const {
+            'attribution': '© OpenStreetMap contributors, © CARTO',
+          },
         ),
+
+        // Option 2: If CartoDB doesn't work, fallback to Stamen Terrain
+        // TileLayer(
+        //   urlTemplate: 'https://stamen-tiles.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png',
+        //   userAgentPackageName: 'dev.terpemon.app',
+        //   additionalOptions: const {
+        //     'attribution': 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.',
+        //   },
+        // ),
+
+        // Option 3: OpenStreetMap with different server (backup)
+        // TileLayer(
+        //   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        //   userAgentPackageName: 'dev.terpemon.app',
+        //   additionalOptions: const {
+        //     'attribution': '© OpenStreetMap contributors',
+        //   },
+        // ),
         MarkerLayer(markers: markers),
         // Blue dot for our location on the map
         CurrentLocationLayer(),
